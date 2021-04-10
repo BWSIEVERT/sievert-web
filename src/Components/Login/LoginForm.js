@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import Copyright from '../CopyRight/Copyright'
 
 // Material UI Login Component Imports
@@ -15,6 +15,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import { auth } from '../../firebase';
 
 // Creating MaterialUI Styles for Login Component
 const useStyles = makeStyles((theme) => ({
@@ -42,6 +43,35 @@ const LoginForm = () => {
 
     const classes = useStyles()
 
+    // Setting Form State
+    const [ form, setForm ] = useState({
+        email: '',
+        password: ''
+    })
+
+    // onChange to set form values
+    const onChange = (e) => {
+        const { name, value } = e.target
+        setForm({
+            ...form,
+            [name]: value
+        })
+    }
+
+    // Creates token for user and verifies on the server
+    const onSubmit = (e) => {
+        e.preventDefault()
+        auth.signInWithEmailAndPassword(form.email, form.password)
+            .then(({user}) => user.getIdToken().then((idToken) => {
+                localStorage.setItem('token', idToken)
+            }))
+            // TODO: Create token verification route
+            // TODO: redirect to profile/dashboard with useHistory()
+            .catch(error => {
+                console.log('Login Error:', error)
+            })
+    }
+
     return (
         <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -52,7 +82,7 @@ const LoginForm = () => {
         <Typography component="h1" variant="h5">
           Login
         </Typography>
-        <form className={classes.form} noValidate>
+        <form onSubmit={onSubmit} className={classes.form} noValidate>
           <TextField
             variant="outlined"
             margin="normal"
@@ -63,6 +93,8 @@ const LoginForm = () => {
             name="email"
             autoComplete="email"
             autoFocus
+            value={form.email}
+            onChange={onChange}
           />
           <TextField
             variant="outlined"
@@ -74,6 +106,8 @@ const LoginForm = () => {
             type="password"
             id="password"
             autoComplete="current-password"
+            value={form.password}
+            onChange={onChange}
           />
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import Copyright from '../CopyRight/Copyright'
 
 // Material UI Register Component Imports
@@ -15,6 +15,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import { auth } from '../../firebase';
 
 // Creating Material UI Styles for Register Component
 const useStyles = makeStyles((theme) => ({
@@ -39,6 +40,30 @@ const useStyles = makeStyles((theme) => ({
 
 const RegisterForm = () => {
 
+    // Setting Form State
+    const [ form, setForm ] = useState({
+        email: '',
+        password: ''
+    })
+
+    // onChange to set form values
+    const onChange = (e) => {
+        const { name, value } = e.target
+        setForm({
+            ...form,
+            [name]: value
+        })
+    }
+
+    // onSubmit to create a firebase user
+    const onSubmit = async (e) => {
+        e.preventDefault()
+        auth.createUserWithEmailAndPassword(form.email, form.password)
+            .then(({user}) => user.getIdToken().then((idToken) => {
+                localStorage.setItem('token', idToken)
+            }))
+    }
+
     const classes = useStyles()
 
     return (
@@ -51,31 +76,8 @@ const RegisterForm = () => {
         <Typography component="h1" variant="h5">
           Register
         </Typography>
-        <form className={classes.form} noValidate>
+        <form onSubmit={onSubmit} className={classes.form} noValidate>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                autoComplete="fname"
-                name="firstName"
-                variant="outlined"
-                required
-                fullWidth
-                id="firstName"
-                label="First Name"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="lastName"
-                label="Last Name"
-                name="lastName"
-                autoComplete="lname"
-              />
-            </Grid>
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
@@ -85,6 +87,8 @@ const RegisterForm = () => {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
+                value={form.email}
+                onChange={onChange}
               />
             </Grid>
             <Grid item xs={12}>
@@ -97,6 +101,8 @@ const RegisterForm = () => {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                value={form.password}
+                onChange={onChange}
               />
             </Grid>
             <Grid item xs={12}>
