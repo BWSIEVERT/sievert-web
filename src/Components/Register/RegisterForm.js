@@ -1,5 +1,7 @@
 import React, {useState} from 'react'
 import Copyright from '../CopyRight/Copyright'
+import { auth } from '../../firebase';
+import { useHistory } from 'react-router-dom'
 
 // Material UI Register Component Imports
 import Avatar from '@material-ui/core/Avatar';
@@ -15,7 +17,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import { auth } from '../../firebase';
+
 
 // Creating Material UI Styles for Register Component
 const useStyles = makeStyles((theme) => ({
@@ -40,11 +42,21 @@ const useStyles = makeStyles((theme) => ({
 
 const RegisterForm = () => {
 
+    const classes = useStyles()
+    const history = useHistory()
+
+    // Setting Alert state
+    const [ open, setOpen ] = useState(false)
+
     // Setting Form State
     const [ form, setForm ] = useState({
         email: '',
         password: ''
     })
+
+    const onAlertChange = (e) => {
+
+    }
 
     // onChange to set form values
     const onChange = (e) => {
@@ -59,12 +71,17 @@ const RegisterForm = () => {
     const onSubmit = async (e) => {
         e.preventDefault()
         auth.createUserWithEmailAndPassword(form.email, form.password)
-            .then(({user}) => user.getIdToken().then((idToken) => {
-                localStorage.setItem('token', idToken)
-            }))
+            .then(({user}) => {
+                // After creating the account, send an email verification to the users email and push to verification page
+                // TODO: add redux store for access to user state and user.emailVerified() on verification page and private routes
+                user.sendEmailVerification()
+                // auth.signOut()
+                history.push('/sweb-users/register/email-verification')
+            })
+            .catch(error => {
+                console.log('Register Error:', error)
+            })
     }
-
-    const classes = useStyles()
 
     return (
         <Container component="main" maxWidth="xs">

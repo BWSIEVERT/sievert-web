@@ -58,7 +58,7 @@ const LoginForm = () => {
         })
     }
 
-    // Creates token for user and verifies on the server
+    // Login User and set token to local storage
     const onSubmit = (e) => {
         e.preventDefault()
         auth.signInWithEmailAndPassword(form.email, form.password)
@@ -68,7 +68,7 @@ const LoginForm = () => {
             // TODO: Create token verification route
             // TODO: redirect to profile/dashboard with useHistory()
             .catch(error => {
-                console.log('Login Error:', error)
+                console.log('Login error:', error)
             })
     }
 
